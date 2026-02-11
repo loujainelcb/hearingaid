@@ -13,19 +13,30 @@ AudioMixer4          outMix;        // 0=normal audio, 1=test tone
 AudioOutputI2S       i2s_out;
 AudioControlSGTL5000 sgtl5000;
 
+AudioInputI2S mic_in;
+AudioMixer4 inMix;   // mixer des entrées (USB / micro)
+
 // normal: USB in -> amp -> eq1 -> eq2 -> eq3 -> mix ch0
-AudioConnection c0(usb_in, 0, amp, 0);
-AudioConnection c1(amp, 0, eq1, 0);
-AudioConnection c2(eq1, 0, eq2, 0);
-AudioConnection c3(eq2, 0, eq3, 0);
-AudioConnection c4(eq3, 0, outMix, 0);
+// ===== Audio connections =====
 
-// test: tone -> mix ch1
-AudioConnection c5(testTone, 0, outMix, 1);
+// USB + Micro -> inMix
+AudioConnection pc_usb_to_mix(usb_in, 0, inMix, 0);
+AudioConnection mic_to_mix(mic_in, 0, inMix, 1);
 
-// mix -> Audio Shield out L/R
-AudioConnection c6(outMix, 0, i2s_out, 0);
-AudioConnection c7(outMix, 0, i2s_out, 1);
+// inMix -> amp -> EQ -> outMix
+AudioConnection mix_to_amp(inMix, 0, amp, 0);
+AudioConnection amp_to_eq1(amp, 0, eq1, 0);
+AudioConnection eq1_to_eq2(eq1, 0, eq2, 0);
+AudioConnection eq2_to_eq3(eq2, 0, eq3, 0);
+AudioConnection eq3_to_out(eq3, 0, outMix, 0);
+
+// test tone -> outMix ch1
+AudioConnection test_to_out(testTone, 0, outMix, 1);
+
+// outMix -> Audio Shield L / R
+AudioConnection out_to_L(outMix, 0, i2s_out, 0);
+AudioConnection out_to_R(outMix, 0, i2s_out, 1);
+
 
 // ===== state =====
 static DspParams gParams = {1.0f, 0.0f, 0.0f, 0.0f};
@@ -93,14 +104,22 @@ static void applyInternal() {
 void dspInit() {
   // Audio Shield init
   sgtl5000.enable();
-  sgtl5000.volume(0.6);   // ajuste si besoin
-
+  sgtl5000.volume(0.6);
+  // activer micro Audio Shield
+  sgtl5000.inputSelect(AUDIO_INPUT_MIC);
+  sgtl5000.micGain(40);   // ajuste plus tard (0–63)
+   // ajuste si besoin
   testTone.begin(WAVEFORM_SINE);
 
   gParams = {1.0f, 0.0f, 0.0f, 0.0f};
   gTestMode = false;
   gTestFreq = 1000.0f;
   gTestDb   = -90.0f;
+  inMix.gain(0, 1.0f);  // USB
+  inMix.gain(1, 0.3f);  // micro (évite larsen)
+
+
+  
 
   applyInternal();
 }
