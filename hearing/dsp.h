@@ -2,20 +2,22 @@
 #include <Arduino.h>
 #include <Audio.h>
 
-// =====================
-// DSP: public API
-// =====================
 
 struct DspParams {
-  float gainGlobal; // multiplicateur (1.0 = 0 dB)
-  float g500;       // dB
-  float g2000;      // dB
-  float g4000;      // dB
+  float gainGlobal;
+  float g500;
+  float g2000;
+  float g4000;
 };
 
-void dspInit();                       // init audio objects + default params
-void dspApply(const DspParams& p);    // apply params (gain + EQ)
-DspParams dspGet();                   // read back current params
+void dspInit();
+void dspApply(const DspParams& p);
+DspParams dspGet();
 
-// Optional: helpers
+// --- Audiogram TEST mode API (needed by gui.py) ---
+void dspSetTestMode(bool on);
+void dspSetTestFreq(float hz);
+void dspSetTestLevelDb(float db);
+
+// helpers
 float clampf(float x, float lo, float hi);

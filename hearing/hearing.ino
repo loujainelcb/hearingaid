@@ -39,6 +39,27 @@ static void parseCommand(const String& lineRaw) {
 
   DspParams p = dspGet();
 
+    if (cmd == "TEST") {
+    arg.toUpperCase();
+    if (arg == "ON")  { dspSetTestMode(true);  Serial.println("OK"); return; }
+    if (arg == "OFF") { dspSetTestMode(false); Serial.println("OK"); return; }
+    Serial.println("ERR TEST expects ON/OFF");
+    return;
+  }
+
+  if (cmd == "FREQ") {
+    dspSetTestFreq(arg.toFloat());
+    Serial.println("OK");
+    return;
+  }
+
+  if (cmd == "LEVEL") {
+    dspSetTestLevelDb(arg.toFloat());
+    Serial.println("OK");
+    return;
+  }
+
+
   if (cmd == "GAIN") {
     p.gainGlobal = arg.toFloat();
     dspApply(p);

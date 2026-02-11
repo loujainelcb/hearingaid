@@ -9,13 +9,13 @@ from serial.tools import list_ports
 # =========================
 FREQS = [250, 500, 1000, 2000, 3000, 4000, 6000, 8000]
 
-TONE_DUR = 0.45
-GAP_DUR  = 0.25
+TONE_DUR = 0.9
+GAP_DUR  = 0.6
 PAUSE_BETWEEN_TRIALS = 0.25
 
-START_DB = -45.0
+START_DB = -10.0
 MIN_DB   = -80.0
-MAX_DB   = -3.0
+MAX_DB   = -3
 
 STEP_LARGE = 6.0
 STEP_MED   = 3.0
@@ -29,7 +29,7 @@ BAND_EQ500  = [250, 500]
 BAND_EQ2000 = [1000, 2000, 3000]
 BAND_EQ4000 = [4000, 6000, 8000]
 
-GAIN_FACTOR = 0.5
+GAIN_FACTOR = 0.4
 GAIN_MAX_DB = 25.0
 GAIN_MIN_DB = 0.0
 
