@@ -2,7 +2,7 @@
   "method": "manual sliders",
   "thresholds_db_rel": null,
   "eq": {
-    "GAIN_global": 1.0,
+    "GAIN_global": 0.2,
     "EQ500_db": 2.0,
     "EQ2000_db": -1.0,
     "EQ4000_db": 0.0

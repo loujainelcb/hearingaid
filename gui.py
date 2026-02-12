@@ -3,6 +3,10 @@ from tkinter import ttk, messagebox
 import time, threading, random, json, os
 import serial
 from serial.tools import list_ports
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
 # =========================
 # Config audiogram (8 freqs)
@@ -338,6 +342,8 @@ class App:
 
         self.stop_btn = ttk.Button(audfrm, text="Stop", command=self.stop_audiogram, state="disabled")
         self.stop_btn.grid(row=1, column=1, sticky="w", pady=(6, 0), padx=(8, 0))
+        self.show_aud_btn = ttk.Button(audfrm, text="Show Audiogram", command=self.show_audiogram_window)
+        self.show_aud_btn.grid(row=1, column=2, sticky="w", pady=(6, 0), padx=(8, 0))
 
         self.prompt_var = tk.StringVar(value="Keys A/B work during test.")
         ttk.Label(audfrm, textvariable=self.prompt_var, wraplength=620).grid(row=2, column=0, columnspan=3, sticky="w", pady=(8, 0))
@@ -370,6 +376,53 @@ class App:
 
         self.eq_info_var = tk.StringVar(value="Computed EQ: (none)")
         ttk.Label(frm, textvariable=self.eq_info_var).grid(row=14, column=0, columnspan=3, sticky="w", pady=(6, 0))
+
+
+    def show_audiogram_window(self):
+        """Open audiogram plot in a separate window (does not change any other behavior)."""
+        if not getattr(self, "results", None):
+            messagebox.showinfo("Audiogram", "No results yet.")
+            return
+
+        win = tk.Toplevel(self.root)
+        win.title("Audiogram")
+        win.geometry("800x500")
+
+        fig = Figure(figsize=(8, 5), dpi=100)
+        ax = fig.add_subplot(111)
+
+        # Collect numeric points only
+        xs, ys = [], []
+        for f in sorted(self.results.keys()):
+            try:
+                xs.append(float(f))
+                ys.append(float(self.results[f]))
+            except Exception:
+                continue
+
+        if not xs:
+            messagebox.showinfo("Audiogram", "No numeric points to plot.")
+            return
+
+        ax.plot(xs, ys, marker="o", linewidth=1.5)
+        ax.set_xscale("log")
+        ax.set_xticks([250, 500, 1000, 2000, 3000, 4000, 6000, 8000])
+        ax.set_xticklabels(["250", "500", "1000", "2000", "3000", "4000", "6000", "8000"])
+        ax.set_xlim(200, 9000)
+        # Your thresholds are 'dB rel' (often negative). Keep a stable view:
+        ax.set_ylim(-90, 0)
+
+        ax.set_title("Audiogram (threshold vs frequency)")
+        ax.set_xlabel("Frequency (Hz)")
+        ax.set_ylabel("Threshold (dB rel)")
+        ax.grid(True, which="both", linestyle="--", linewidth=0.6)
+
+        fig.tight_layout()
+
+        canvas = FigureCanvasTkAgg(fig, master=win)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
 
     # ---------- Ports / connect ----------
     def _refresh_ports(self):
@@ -700,3 +753,5 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = App(root)
     root.mainloop()
+
+
